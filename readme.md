@@ -56,7 +56,7 @@ Simple pinescript example here only to demonstrate specific settings that have w
 strategy(title="some strat - bot1)", default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, overlay=true, calc_on_every_tick=true)
 // default_qty_type=strategy.percent_of_equity and default_qty_value=10 means default order 10% of account
 // calc_on_every_tick=true ensures last bar state visible in strategy
-// strat quantity in pinescript is only used for backtesting, node server only receives the buy or sell commands
+// strat quantity in pinescript is only used for backtesting, node server only receives the buyMessage or sellMessage below as plain text.
 
 buyMessage = 'BOT1 BUY ETHUSDT' // has to match some CMD in settings.json
 sellMessage = 'BOT1 SELL ETHUSDT' // has to match some CMD in settings.json
