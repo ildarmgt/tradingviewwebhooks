@@ -98,6 +98,25 @@ if (sellSignal)
 
 This has worked so far.
 
+## vps to set it up on
+
+If not running locally, before doing above, set up VPS for this purpose - remote computer. I use vultr.com w/ $5/month server (haven't tested $2.5/month version yet)
+
+1. fund it
+2. deploy new server (used cloud, w/e location, ubuntu 20.04, $5, deploy)
+3. View console to get to remote termal in browser & install necessary software
+```
+sudo apt update
+sudo apt install nodejs
+sudo apt install npm # has to be done separately w/ default rep
+nodejs -v # should give version
+npm -v # should give version
+
+```
+4. set up ssh & sftp (e.g. `sudo apt install ssh`) to upload files easily or follow [example](http://archive.is/iiQ8t).
+
+5. Upload files. Locally, I use midnight commander (`sudo apt install mc` & `mc`). Right > sFTP link... > `sftpuser@123.456.78.9` where latter is vps external ip address & enter password on next screen. Tab switches panels or mouse depending on terminal. Copy between pannels as normal via f5 into wherever remote sftpuser was given write permission (w/ chmod) e.g. `/home/sftpuser/`.
+
 ## To do
 
 * logging
