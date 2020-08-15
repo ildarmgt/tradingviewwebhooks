@@ -1,0 +1,23 @@
+{
+  "port": 80,
+  "bots": [
+    {
+      "CMD": "BOT1 BUY BTCUSDT",
+      "COIN1": "BTC",
+      "COIN2": "USDT",
+      "TYPE": "buy",
+      "EXCHANGE": "binance",
+      "API_KEY": "12345",
+      "API_SECRET": "123456"
+    },
+    {
+      "CMD": "BOT1 SELL BTCUSDT",
+      "COIN1": "BTC",
+      "COIN2": "USDT",
+      "TYPE": "sell",
+      "EXCHANGE": "binance",
+      "API_KEY": "12345",
+      "API_SECRET": "123456"
+    }
+  ]
+}
