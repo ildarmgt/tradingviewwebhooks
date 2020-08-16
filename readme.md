@@ -58,8 +58,8 @@ strategy(title="some strat - bot1)", default_qty_type=strategy.percent_of_equity
 // calc_on_every_tick=true ensures last bar state visible in strategy
 // strat quantity in pinescript is only used for backtesting, node server only receives the buyMessage or sellMessage below as plain text.
 
-buyMessage = 'BOT1 BUY ETHUSDT' // has to match some CMD in settings.json
-sellMessage = 'BOT1 SELL ETHUSDT' // has to match some CMD in settings.json
+buyMessage = 'BOT1 BUY BTCUSDT' // has to match some CMD in settings.json
+sellMessage = 'BOT1 SELL BTCUSDT' // has to match some CMD in settings.json
 
 // most cliche exponential moving average used for example
 lengthFast = input(14)
