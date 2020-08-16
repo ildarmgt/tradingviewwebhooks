@@ -109,7 +109,7 @@ If not running locally, before doing above, set up VPS for this purpose - remote
 sudo apt update
 sudo apt install nodejs
 sudo apt install npm # has to be done separately w/ default rep
-nodejs -v # should give version
+node -v # should give version
 npm -v # should give version
 
 ```
