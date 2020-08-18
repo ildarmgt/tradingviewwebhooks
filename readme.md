@@ -72,14 +72,17 @@ slow = ema(hlc3, lengthSlow)
 buySignal = fast > slow and barstate.isconfirmed
 sellSignal = not buySignal and barstate.isconfirmed
 
-// entry and trailing stop
+// entry
 if (buySignal)
     strategy.entry("buy", long=strategy.long, alert_message=buyMessage)
-    strategy.exit("ts","buy", stop=lowest(low, lengthSlow)[1], alert_message=sellMessage)
+
 
 // exit
 if (sellSignal)
     strategy.close_all(true, comment="sell", alert_message=sellMessage)
+
+// trailing stop
+strategy.exit("ts","buy", stop=lowest(low, lengthSlow)[1], alert_message=sellMessage)
 
 // plot(fast, color=color.blue) // uncomment to plot
 // plot(slow, color=color.red) // uncomment to plot

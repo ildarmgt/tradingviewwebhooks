@@ -1,7 +1,7 @@
 import ccxt from 'ccxt'
 import _ from 'lodash'
-
-import { dateit } from './helpers'
+import { consoleLog } from './log'
+// import { dateit } from './helpers'
 
 export const runBot = async ({ bot, st }) => {
   const { CMD, EXCHANGE, API_KEY, API_SECRET, COIN1, COIN2, TYPE } = bot
@@ -17,14 +17,14 @@ export const runBot = async ({ bot, st }) => {
     }
   })
   await thisExchange.loadMarkets()
-  console.log(`${dateit()} ${EXCHANGE} initialized`)
+  consoleLog(st, `${EXCHANGE} initialized`)
 
   // get balances
   const balance = await thisExchange.fetchBalance()
   const amountCoin1 = balance[COIN1].total
   const amountCoin2 = balance[COIN2].total
-  st[COIN1] = amountCoin1
-  st[COIN2] = amountCoin2
+  st.coins[COIN1] = amountCoin1
+  st.coins[COIN2] = amountCoin2
 
   // get price info
   const ticker = await thisExchange.fetchTicker(pair)
@@ -34,13 +34,13 @@ export const runBot = async ({ bot, st }) => {
   const minTradeUnit1 = (ticker.info.MinimumTrade || 0) * 1.1
   const minTradeUnit2 = minTradeUnit1 * price
 
-  console.log(`${dateit()} ${EXCHANGE}:: ${amountCoin1} ${COIN1}`)
-  console.log(`${dateit()} ${EXCHANGE}:: ${amountCoin2} ${COIN2}`)
-  console.log(`${dateit()} ${EXCHANGE}:: ${price} ${pair}`)
-  // console.log('balance1:', JSON.stringify(balance[COIN1], null, 2))
-  // console.log('balance2:', JSON.stringify(balance[COIN2], null, 2))
-  // console.log('ticker:', JSON.stringify(ticker, null, 2))
-  // console.log(`min trade = ${minTradeUnit1} ${COIN1} or ${minTradeUnit2} ${COIN2}`)
+  consoleLog(st, `${EXCHANGE}:: ${amountCoin1} ${COIN1}`)
+  consoleLog(st, `${EXCHANGE}:: ${amountCoin2} ${COIN2}`)
+  consoleLog(st, `${EXCHANGE}:: ${price} ${pair}`)
+  // consoleLog(st, 'balance1:', JSON.stringify(balance[COIN1], null, 2))
+  // consoleLog(st, 'balance2:', JSON.stringify(balance[COIN2], null, 2))
+  // consoleLog(st, 'ticker:', JSON.stringify(ticker, null, 2))
+  // consoleLog(st, `min trade = ${minTradeUnit1} ${COIN1} or ${minTradeUnit2} ${COIN2}`)
 
   const isBuy = TYPE === 'buy'
   const isSell = TYPE === 'sell'
@@ -51,23 +51,25 @@ export const runBot = async ({ bot, st }) => {
     const isEnoughAvailable = amountCoin2 > minTradeUnit2
     if (isEnoughAvailable) {
       const orderSize = _.floor(amountCoin2 / price * 0.99, 8)
-      console.log(`${dateit()} ${EXCHANGE}:: Placing market buy for`, orderSize, COIN1, 'with', COIN2)
+      consoleLog(st, `${EXCHANGE}:: Placing market buy for`, orderSize, COIN1, 'with', COIN2)
       try {
         const res = await thisExchange.createMarketBuyOrder(pair, orderSize)
 
-        // console.log('res:', JSON.stringify(res, null, 2))
-        // res.info.fills is an array of { qty = coin1 sold, price = price sold at, fee.cost = fee, fee.currency = fee unit, tradeId }
-        // or overall res.filled and res.cost and res.price useful
-        console.log(
-          `${dateit()} ${EXCHANGE}:: Done. Bought ${res.filled} ${COIN1} for ${res.cost} ${COIN2} at ${res.average} ${res.symbol} paying ${res
-            .fee.cost} ${res.fee.currency} fee.`
+        consoleLog(
+          st,
+          `${EXCHANGE}:: Done. Bought ${res.filled} ${COIN1} for ${res.cost} ${COIN2}` +
+            ` at ${res.average} ${res.symbol} paying ${res.fee.cost} ${res.fee.currency} fee.`
         )
+        // account for changes
+        st.coins[COIN1] += res.filled
+        st.coins[COIN2] -= res.cost
       } catch (e) {
-        console.warn(`${dateit()} ${EXCHANGE}:: ${e.name}`)
+        console.warn(`${EXCHANGE}:: ${e.name}`)
       }
     } else {
-      console.log(
-        `${dateit()} ${EXCHANGE}:: min trade amount is ${minTradeUnit2} ${COIN2} but only ${amountCoin2} ${COIN2} available `
+      consoleLog(
+        st,
+        `${EXCHANGE}:: min trade amount is ${minTradeUnit2} ${COIN2} but only ${amountCoin2} ${COIN2} available `
       )
     }
   }
@@ -78,21 +80,24 @@ export const runBot = async ({ bot, st }) => {
     const isEnoughAvailable = amountCoin1 > minTradeUnit1
     if (isEnoughAvailable) {
       const orderSize = _.floor(amountCoin1 * 0.99, 8)
-      console.log(`${dateit()} ${EXCHANGE}:: Placing market sell for`, pair, 'in amount of', orderSize, COIN1)
+      consoleLog(st, `${EXCHANGE}:: Placing market sell for`, pair, 'in amount of', orderSize, COIN1)
       try {
         const res = await thisExchange.createMarketSellOrder(pair, orderSize)
-        // console.log('res:', JSON.stringify(res, null, 2))
 
-        console.log(
-          `${dateit()} ${EXCHANGE}:: Done. Sold ${res.filled} ${COIN1} for ${res.cost} ${COIN2} at ${res.average} ${res.symbol} paying ${res
-            .fee.cost} ${res.fee.currency} fee.`
+        consoleLog(
+          st,
+          `${EXCHANGE}:: Done. Sold ${res.filled} ${COIN1} for ${res.cost} ${COIN2} ` +
+            `at ${res.average} ${res.symbol} paying ${res.fee.cost} ${res.fee.currency} fee.`
         )
+        st.coins[COIN1] -= res.filled
+        st.coins[COIN2] += res.cost
       } catch (e) {
-        console.warn(`${dateit()} ${EXCHANGE}:: ${e.name}`)
+        console.warn(`${EXCHANGE}:: ${e.name}`)
       }
     } else {
-      console.log(
-        `${dateit()} ${EXCHANGE}:: min trade amount is ${minTradeUnit1} ${COIN1} but only ${amountCoin1} ${COIN1} available `
+      consoleLog(
+        st,
+        `${EXCHANGE}:: min trade amount is ${minTradeUnit1} ${COIN1} but only ${amountCoin1} ${COIN1} available `
       )
     }
   }
