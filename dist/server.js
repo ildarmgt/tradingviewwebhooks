@@ -49,16 +49,25 @@ const server = () => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).end();
     }));
     app.get('/', (req, res) => {
-        const info = `Get request @ '/'. Public ip: http://${ip}:${settings.port}/\n` + JSON.stringify(st, null, 2);
+        let info = `Get request @ '/'. Public ip: http://${ip}:${settings.port}/\n`;
+        info += JSON.stringify(st, null, 2);
         log_1.consoleLog(st, info);
         res.send(info);
     });
     // disable after testing to quick init
-    app.get('/initbuy0', (req, res) => {
-        const info = `Get request @ '/initbuy0'. Public ip: http://${ip}:${settings.port}/initbuy0\n`;
+    app.get('/buystuff', (req, res) => {
+        const info = `Manual request to buy`;
         log_1.consoleLog(st, info);
         res.send(info);
         runBot_1.runBot({ bot: settings.bots[0], st }); // init buy
+    });
+    app.get('/sellstuff', (req, res) => {
+        const info = `Manual request to sell`;
+        log_1.consoleLog(st, info);
+        res.send(info);
+        log_1.consoleLog(st, info);
+        res.send(info);
+        runBot_1.runBot({ bot: settings.bots[1], st }); // init buy
     });
     app.listen(settings.port, (e) => {
         if (e)

@@ -17,6 +17,8 @@ const ccxt_1 = __importDefault(require("ccxt"));
 const lodash_1 = __importDefault(require("lodash"));
 const log_1 = require("./log");
 // import { dateit } from './helpers'
+const UNDERSIZE_RATIO = 0.99;
+const MIN_TRADE_OVERSIZE_RATIO = 1.1;
 exports.runBot = ({ bot, st }) => __awaiter(void 0, void 0, void 0, function* () {
     const { CMD, EXCHANGE, API_KEY, API_SECRET, COIN1, COIN2, TYPE } = bot;
     const pair = `${COIN1}/${COIN2}`;
@@ -41,7 +43,7 @@ exports.runBot = ({ bot, st }) => __awaiter(void 0, void 0, void 0, function* ()
     const ticker = yield thisExchange.fetchTicker(pair);
     const price = (ticker.bid + ticker.ask) / 2.0;
     // get minimum purchase size (overestimated)
-    const minTradeUnit1 = (ticker.info.MinimumTrade || 0) * 1.1;
+    const minTradeUnit1 = (ticker.info.MinimumTrade || 0) * MIN_TRADE_OVERSIZE_RATIO;
     const minTradeUnit2 = minTradeUnit1 * price;
     log_1.consoleLog(st, `${EXCHANGE}:: ${amountCoin1} ${COIN1}`);
     log_1.consoleLog(st, `${EXCHANGE}:: ${amountCoin2} ${COIN2}`);
@@ -56,7 +58,7 @@ exports.runBot = ({ bot, st }) => __awaiter(void 0, void 0, void 0, function* ()
     if (isBuy) {
         const isEnoughAvailable = amountCoin2 > minTradeUnit2;
         if (isEnoughAvailable) {
-            const orderSize = lodash_1.default.floor(amountCoin2 / price * 0.99, 8);
+            const orderSize = lodash_1.default.floor(amountCoin2 / price * UNDERSIZE_RATIO, 8);
             log_1.consoleLog(st, `${EXCHANGE}:: Placing market buy for`, orderSize, COIN1, 'with', COIN2);
             try {
                 const res = yield thisExchange.createMarketBuyOrder(pair, orderSize);
@@ -78,7 +80,7 @@ exports.runBot = ({ bot, st }) => __awaiter(void 0, void 0, void 0, function* ()
     if (isSell) {
         const isEnoughAvailable = amountCoin1 > minTradeUnit1;
         if (isEnoughAvailable) {
-            const orderSize = lodash_1.default.floor(amountCoin1 * 0.99, 8);
+            const orderSize = lodash_1.default.floor(amountCoin1 * UNDERSIZE_RATIO, 8);
             log_1.consoleLog(st, `${EXCHANGE}:: Placing market sell for`, pair, 'in amount of', orderSize, COIN1);
             try {
                 const res = yield thisExchange.createMarketSellOrder(pair, orderSize);

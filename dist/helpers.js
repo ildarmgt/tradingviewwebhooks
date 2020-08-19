@@ -14,5 +14,5 @@ exports.readJSON = (path) => {
         return {};
     }
 };
-exports.dateit = () => `\n${new Date().toISOString()}::`;
+exports.dateit = () => `${new Date().toISOString()}::`;
 //# sourceMappingURL=helpers.js.map

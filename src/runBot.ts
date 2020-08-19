@@ -3,6 +3,9 @@ import _ from 'lodash'
 import { consoleLog } from './log'
 // import { dateit } from './helpers'
 
+const UNDERSIZE_RATIO = 0.99
+const MIN_TRADE_OVERSIZE_RATIO = 1.1
+
 export const runBot = async ({ bot, st }) => {
   const { CMD, EXCHANGE, API_KEY, API_SECRET, COIN1, COIN2, TYPE } = bot
   const pair = `${COIN1}/${COIN2}`
@@ -31,7 +34,7 @@ export const runBot = async ({ bot, st }) => {
   const price = (ticker.bid + ticker.ask) / 2.0
 
   // get minimum purchase size (overestimated)
-  const minTradeUnit1 = (ticker.info.MinimumTrade || 0) * 1.1
+  const minTradeUnit1 = (ticker.info.MinimumTrade || 0) * MIN_TRADE_OVERSIZE_RATIO
   const minTradeUnit2 = minTradeUnit1 * price
 
   consoleLog(st, `${EXCHANGE}:: ${amountCoin1} ${COIN1}`)
@@ -50,7 +53,7 @@ export const runBot = async ({ bot, st }) => {
   if (isBuy) {
     const isEnoughAvailable = amountCoin2 > minTradeUnit2
     if (isEnoughAvailable) {
-      const orderSize = _.floor(amountCoin2 / price * 0.99, 8)
+      const orderSize = _.floor(amountCoin2 / price * UNDERSIZE_RATIO, 8)
       consoleLog(st, `${EXCHANGE}:: Placing market buy for`, orderSize, COIN1, 'with', COIN2)
       try {
         const res = await thisExchange.createMarketBuyOrder(pair, orderSize)
@@ -79,7 +82,7 @@ export const runBot = async ({ bot, st }) => {
   if (isSell) {
     const isEnoughAvailable = amountCoin1 > minTradeUnit1
     if (isEnoughAvailable) {
-      const orderSize = _.floor(amountCoin1 * 0.99, 8)
+      const orderSize = _.floor(amountCoin1 * UNDERSIZE_RATIO, 8)
       consoleLog(st, `${EXCHANGE}:: Placing market sell for`, pair, 'in amount of', orderSize, COIN1)
       try {
         const res = await thisExchange.createMarketSellOrder(pair, orderSize)

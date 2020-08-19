@@ -1,4 +1,5 @@
 import fs from 'fs'
+import csvWriter from 'csv-write-stream'
 
 import { I_Settings } from './types'
 
@@ -11,4 +12,4 @@ export const readJSON = (path: any): I_Settings => {
   }
 }
 
-export const dateit = () => `\n${new Date().toISOString()}::`
+export const dateit = () => `${new Date().toISOString()}::`
